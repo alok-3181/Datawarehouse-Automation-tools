@@ -1,0 +1,29 @@
+rm -rf Table_details.txt
+cp template_bteq_help_fields.txt bteq_help_fields.txt
+perl bteq_perl_trigger.pl
+bteq < bteq_help_fields.txt
+cat Table_details.txt | cut -d '|' -f1 > teradata_fields.txt
+cat Table_details.txt | cut -d '|' -f7 > teradata_field_length.txt
+sed -i '1d' teradata_fields.txt teradata_field_length.txt
+sed -i 's/4/40/g' teradata_field_length.txt
+sed -i 's/ //g' teradata_field_length.txt teradata_fields.txt
+cp teradata_fields.txt pre_teradata_fields.txt
+cp teradata_fields.txt pre_teradata_fields1.txt
+sed -i 's/$/ (varchar(/' teradata_fields.txt
+paste teradata_fields.txt teradata_field_length.txt | sed 's/\t//g' >pre_query.txt
+sed -i 's/$/)),/' pre_query.txt
+sed -i '$s/,$//' pre_query.txt
+sed -i 's/^/:/' pre_teradata_fields.txt
+sed -i 's/$/,/' pre_teradata_fields.txt
+sed -i '$s/,$//' pre_teradata_fields.txt
+sed -i 's/$/,/' pre_teradata_fields1.txt
+sed -i '$s/,$//' pre_teradata_fields1.txt
+cat pre_teradata_fields.txt | xargs | sed 's/ //g' > pre_teradata_upld1.txt
+cat pre_teradata_fields1.txt | xargs | sed 's/ //g' > pre_teradata_upld2.txt
+rm -rf pre_teradata_fields.txt pre_teradata_fields1.txt teradata_fields.txt teradata_field_length.txt
+cat pre_upload_template1.txt > final_upload.txt
+cat pre_query.txt >> final_upload.txt
+cat pre_upload_template2.txt >> final_upload.txt
+perl process_final_upload.pl
+rm -rf pre_teradata_upld1.txt pre_teradata_upld2.txt pre_query.txt database_table.txt Table_details.txt
+#bteq < final_upload.txt

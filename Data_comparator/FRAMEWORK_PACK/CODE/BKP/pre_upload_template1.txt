@@ -1,0 +1,4 @@
+.logon dwsoat.dws.company.co.uk/Teradataid,Teradatapassword;
+.import vartext ',' file ='csvfilewithfullpath'
+.repeat *;
+using

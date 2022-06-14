@@ -1,0 +1,159 @@
+#!/usr/bin/perl
+print "\n:";
+my $useropt = <STDIN>;
+chomp $useropt;
+ if ($useropt eq 0){
+	exit 0;
+	}
+elsif($useropt ==1){
+print "Enter the first filename to compare \n";
+my $filename = <STDIN>;
+chomp $filename;
+print "Enter the second filename to compare \n";
+my $filename1 = <STDIN>;
+chomp $filename1;
+$cmd_sort1 ="sort <$filename >a.$filename";
+$cmd_sort2 ="sort <$filename1 >b.$filename1";
+system (" $cmd_sort1 & $cmd_sort2 ");
+$count_file1 = `cat $filename |wc -l`;
+$count_file2 = `cat $filename1 | wc -l`;
+if ($count_file1 eq $count_file2)
+{
+$cmd4="perl compare a.$filename b.$filename1";
+system ("$cmd4");
+`rm a.$filename b.$filename1`;
+print "Difference will be in file Difference_a.$filename.b.$filename1.final.txt\n\n";
+print "Converting teh difference file to csv\n";
+$cmd5 ="python txttocsv.py Difference_a.$filename.b.$filename1.final.txt Difference_csv.csv";
+system (" $cmd5 ");
+`rm Difference_a.$filename.b.$filename1.final.txt`;
+print " Colorcoding and convert to xls format\n ";
+$csv_row_count =`cat Difference_csv.csv | wc -l`;
+chomp $csv_row_count;
+`sh count.sh`;
+$csv_column_count = `cat color_columns.txt`;
+chomp $csv_column_count;
+$cmd_copy_template = "cp template_color_coding_excel.py color_coding_excel.py";
+system (" $cmd_copy_template ");
+$cmd7 ="sed -i 's/rowrange/$csv_row_count/g' color_coding_excel.py";
+$cmd8 ="sed -i 's/columnrange/$csv_column_count/g' color_coding_excel.py";
+system (" $cmd7 ");
+system (" $cmd8 ");
+`sh colorcoding.sh`;
+`rm Difference_csv.csv color_columns.txt`;
+print "final excel is Compare_result.xls \n";
+}
+else {
+$cmd_cmp = "grep -v -F -f a.$filename b.$filename1 > not_matched_records.txt";
+system (" $cmd_cmp ");
+print "unmatched records in file not_matched_records.txt\n";
+}
+}
+elsif($useropt ==5){
+$path =`pwd`;
+chomp $path;
+$cmd1="perl $path/CODE/Data_setup";
+system (" $cmd1 ");
+}
+elsif($useropt ==2){
+print "Enter the inputfile name\n";
+my $inputfile = <STDIN>;
+chomp $inputfile;
+print "Enter output filename\n";
+my $outputfile = <STDIN>;
+chomp $outputfile;
+$cmd1 ="python txttocsv.py $inputfile $outputfile";
+system (" $cmd1 ");
+}
+elsif($useropt ==10){
+print "Enter the inputfile name\n";
+my $inputfile = <STDIN>;
+chomp $inputfile;
+$cmd1 ="cat -n $inputfile > $inputfile.with.linenumber";
+system (" $cmd1 ");
+print " result in $inputfile.with.linenumber\n ";
+}
+elsif($useropt ==3){
+print "Enter the inputfile followed by output filename \n";
+`sh csvtoxls.sh`;
+}
+elsif($useropt ==4){
+$cmd1="perl delinsert.pl";
+system (" $cmd1 ");
+}
+elsif($useropt ==11){
+$cmd1="perl xargvinput.pl";
+system (" $cmd1 ");
+`rm drop_columns.txt`;
+}
+elsif($useropt ==6){
+$cmd1="sh bteq_upload.wrapper.txt";
+system (" $cmd1 ");
+}
+elsif($useropt ==7){
+print "Enter the table data to unload in format database.tablename and final result will be in database.tablename.txt file \n";
+my $filename = <STDIN>;
+chomp $filename;
+$path=`pwd`;
+chomp $path;
+$cmd1 ="hive -e 'select * from $filename' > $path/$filename.txt";
+system (" $cmd1 ");
+system (" sleep 2");
+$cmd2="sed -i 's/[[:space:]]\\+/|/g' $filename.txt";
+#print " $cmd2\n";
+system (" $cmd2 ");
+}
+elsif($useropt ==12){
+$cmd1="sh bteq_field_position.wrapper.txt";
+system (" $cmd1 ");
+`rm teradata_fields.txt database_table.txt bteq_help_fields.txt Table_details.txt`;
+print " output is in file teradata_fields_positions.txt \n";
+}
+elsif($useropt ==13){
+print "Enter the table details in format database.tablename and final result will be in database.tablename.positions.txt file \n";
+my $filename = <STDIN>;
+chomp $filename;
+$path=`pwd`;
+chomp $path;
+$cmd1 ="hive -e 'describe $filename' > $path/$filename.pos.txt";
+system (" $cmd1 ");
+$cmd2 ="cat -n $path/$filename.pos.txt > $path/$filename.positions.txt";
+$cmd3 ="rm -rf $path/$filename.pos.txt";
+system (" $cmd2 ");
+system (" $cmd3 ");
+}
+elsif($useropt ==8){
+print " Enter the oracle details in schema.tablename format\n";
+`sh oraclerun.sh`;
+print " output is in oracle_output.csv\n";
+}
+elsif($useropt ==9){
+print " Enter the oracle details in schema.tablename format\n";
+`sh oraclerun.sh`;
+print " output is in oracle_output.csv\n";
+print " Enter the oracle details in schema.tablename format\n";
+`sh oraclerun1.sh`;
+print " output is in oracle_output1.csv\n";
+}
+elsif($useropt ==9){
+`sh cleanup.sh`;
+print "Deleted all files, only source code files present\n";
+}
+elsif($useropt ==9){
+print "For adding header/tailer for customer system monthly files\n";
+print " Enter date in format DDMMYYYY\n";
+my $date = <STDIN>;
+chomp $date;
+print " Enter filename to add header and tailor into\n";
+my $filename = <STDIN>;
+chomp $filename;
+print " Enter Target file \n";
+my $target = <STDIN>;
+chomp $target;
+`sh hdtl.sh $date $filename $target`;
+print " output file will be FINAL_RDFP_$target._.$date.dat \n";
+}
+else {
+	 print "Incorrect option give correct option\n";
+	 my $useroption = <STDIN>;
+	 }

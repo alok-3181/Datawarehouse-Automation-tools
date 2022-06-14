@@ -1,0 +1,2 @@
+.EXPORT REPORT FILE=TS_72258_BASELDB.sample_alok1.txt
+select * from TS_72258_BASELDB.sample_alok1;

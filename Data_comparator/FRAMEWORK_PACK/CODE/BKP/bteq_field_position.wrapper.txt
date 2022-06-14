@@ -1,0 +1,8 @@
+rm -rf Table_details.txt
+cp template_bteq_help_fields.txt bteq_help_fields.txt
+perl bteq_perl_trigger.pl
+bteq < bteq_help_fields.txt
+cat Table_details.txt | cut -d '|' -f1 > teradata_fields.txt
+sed -i '1d' teradata_fields.txt
+sed -i 's/ //g' teradata_fields.txt
+cat -n teradata_fields.txt > teradata_fields_positions.txt
